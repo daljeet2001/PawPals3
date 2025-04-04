@@ -33,7 +33,7 @@ const DogWalkerSchema = new mongoose.Schema({
 
     image: {
         type: String, // URL or path to the image
-        required: false,
+        required: true,
     },
     description: {
         type: String,

@@ -9,7 +9,7 @@ export const registerDogwalker = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, phone, experience, availability, description, hourlyRate } = req.body;
+    const { name, email, password, phone, experience, availability, description, hourlyRate,image } = req.body;
 
     const isDogwalkerAlreadyExist = await dogwalkerModel.findOne({ email });
 
@@ -27,7 +27,8 @@ export const registerDogwalker = async (req, res, next) => {
         experience,
         availability,
         description,
-        hourlyRate
+        hourlyRate,
+        image
     });
 
     const token = dogwalker.generateJWT();

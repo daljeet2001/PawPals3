@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
         },
         image:{
             type:String,
-            default:"https://dogacademy.org/blog/wp-content/uploads/2023/10/pocket-bully-on-grass.jpg"
+            required: true,
          },
         gender: {
             type: String,

@@ -14,6 +14,7 @@ router.post('/register', [
     body('availability.*').isString().withMessage('Each availability must be a string'),
     body('description').isLength({ max: 200 }).withMessage('Description must not be longer than 200 characters'),
     body('hourlyRate').isNumeric().withMessage('Hourly rate must be a number'),
+    body('image').isString().withMessage('Image URL must be a string'),
 ],
     dogwalkerController.registerDogwalker
 )

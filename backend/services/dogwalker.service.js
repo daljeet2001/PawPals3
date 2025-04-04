@@ -1,9 +1,9 @@
 import dogwalkerModel from '../models/dogwalker.model.js';
 
 export const createDogwalker = async ({
-    name, email, password, phone, experience, availability, description, hourlyRate
+    name, email, password, phone, experience, availability, description, hourlyRate,image
 }) => {
-    if (!name || !email || !password || !phone || !experience || !availability || !description || !hourlyRate) {
+    if (!name || !email || !password || !phone || !experience || !availability || !description || !hourlyRate || !image) {
         throw new Error('All fields are required');
     }
 
@@ -15,7 +15,8 @@ export const createDogwalker = async ({
         experience,
         availability,
         description,
-        hourlyRate
+        hourlyRate,
+        image
     });
 
     return dogwalker;
