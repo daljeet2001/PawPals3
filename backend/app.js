@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import userRoutes from './routes/user.routes.js';
 import dogwalkerRoutes from './routes/dogwalker.routes.js';
+import mapRoutes from './routes/maps.routes.js';
 connectToDb();
 
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 
 app.use("/user", userRoutes);
 app.use("/dogwalker", dogwalkerRoutes);
+app.use("/map", mapRoutes);
 
 app.get('/', (req, res) => {
     res.send('Hello PawPals!');

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faEnvelope, faPaw} from '@fortawesome/free-solid-svg-icons'
 const UserLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,13 +19,37 @@ const UserLogin = () => {
     if(response.status===200){
       const data=response.data
       console.log(data)
+      localStorage.setItem('token', data.token)
       navigate('/home')
     }
     console.log('Logging in with:', { email, password });
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="w-full bg-[white] border-b border-gray-300 text-black flex items-center justify-between px-6 py-4 shadow-md">
+              <div className="flex items-center">
+                {/* <FaPaw className="text-2xl" /> */}
+                
+                <h1 className="text-3xl font-bold text-[#FFBD5C] pb-1">Pawpals <FontAwesomeIcon icon={faPaw} /></h1>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+      
+               <div className="opacity-50 hover:opacity-100 transition-opacity duration-300 mx-2"><i class="ri-heart-line mx-1"></i><a href="#become-sitter">Become a Sitter</a></div> 
+                <div  className="opacity-50 hover:opacity-100 transition-opacity duration-300 mx-2"><i class="ri-service-line mx-1"></i><a href="#our-services" >Our Services</a></div>
+                <div  className="opacity-50 hover:opacity-100 transition-opacity duration-300 mx-2"><i class="ri-question-line mx-1"></i><a href="#our-services" >Help</a></div>
+              </div>
+         
+              {/* <div className="flex items-center space-x-4">
+                <img
+                  src="https://img.freepik.com/premium-vector/cute-dog-logo-vector-sticker_622550-2401.jpg?w=826" // Replace with the actual user image path
+                  alt="User"
+                  className="w-12 h-12 rounded-full border-2 border-white"
+                />
+               
+              </div> */}
+            </header>
+    <div className="flex min-h-screen">     
       {/* Left Side: Login Form */}
       <div className="w-1/2 flex flex-col items-center justify-center bg-white text-black">
       <div className="w-full  text-3xl font-semibold text-center mb-4">
@@ -65,7 +90,7 @@ const UserLogin = () => {
             </div>
             <button
               type="submit"
-              className="w-full px-4 py-2 font-bold text-white bg-[#FF9A88] rounded-md hover:bg-[#FFDACA]"
+              className="w-full px-4 py-2 font-bold text-white bg-[#FFBD5C] rounded-md hover:bg-[#E7EEF8]"
             >
               Login
             </button>
@@ -74,7 +99,7 @@ const UserLogin = () => {
             Don't have an account?{' '}
             <button
               onClick={() => navigate('/register')}
-              className="font-medium text-[#FF9A88] underline hover:text-[#FFDACA]"
+              className="font-medium text-[#FFBD5C] underline hover:text-[#E7EEF8]"
             >
               Create one
             </button>
@@ -82,7 +107,7 @@ const UserLogin = () => {
             Are you a petwalker?{' '}
             <button
               onClick={() => navigate('/dogwalker-login')}
-              className="font-medium text-[#FFBD5C] underline hover:text-[#FFDACA]"
+              className="font-medium text-[#FFBD5C] underline hover:text-[#E7EEF8]"
             >
               Login here
             </button></p>
@@ -96,9 +121,11 @@ const UserLogin = () => {
 
       {/* Right Side: Image Placeholder */}
       <div className="w-1/2 flex items-center justify-center bg-white">
-      <img src="https://img.freepik.com/free-vector/hand-drawn-illustration-people-with-pets_23-2148980837.jpg?t=st=1743747458~exp=1743751058~hmac=f10fd2bf8591c5633f81d0f3037a915ced020b2a69a7b7f3378c1f7b520d97c6&w=826" alt="dog image"></img>
+      <img src="https://img.freepik.com/free-vector/people-walking-dog-concept_23-2148528607.jpg?t=st=1743756609~exp=1743760209~hmac=f322dbe456c39ddf491c2e2215ef61f228849b0737238c6e43c620eab14768b2&w=1380" alt="dog image"></img>
       </div>
     </div>
+    </div>
+    
   );
 };
 
