@@ -28,6 +28,7 @@ export const registerDogwalker = async (req, res, next) => {
         hourlyRate,
         image
     });
+    req.dogwalker = dogwalker;
 
     const token = dogwalker.generateJWT();
 
@@ -57,6 +58,7 @@ export const loginDogwalker = async (req, res, next) => {
     const token = dogwalker.generateJWT();
 
     res.cookie('token', token);
+    req.dogwalker = dogwalker;
 
     res.status(200).json({ token, dogwalker });
 }

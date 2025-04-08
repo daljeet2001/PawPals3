@@ -38,7 +38,12 @@ const DogWalkerSchema = new mongoose.Schema({
         maxLength: [200, 'Description must not be longer than 200 characters'],
     },
     location: {
-      type:String,
+        ltd: {
+            type: Number,
+        },
+        lng: {
+            type: Number,
+        }
       
     },
     hourlyRate: {
