@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         select: false,
     },
+    profileImage:{
+        type: String,
+        required: true,
+    },
 
     dog: {
         dogname: {
@@ -35,7 +39,7 @@ const userSchema = new mongoose.Schema({
             required: true,
             trim: true,
         },
-        image:{
+        dogImage:{
             type:String,
             required: true,
          },

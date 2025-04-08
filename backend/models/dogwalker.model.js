@@ -22,13 +22,10 @@ const DogWalkerSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    experience: {
-        type: Number, // years of experience
-        required: true,
-    },
+ 
     availability: {
         type: [String], // e.g., ['Monday', 'Wednesday', 'Friday']
-        required: true,
+       
     },
 
     image: {
@@ -41,12 +38,8 @@ const DogWalkerSchema = new mongoose.Schema({
         maxLength: [200, 'Description must not be longer than 200 characters'],
     },
     location: {
-        ltd: {
-            type: Number,
-        },
-        lng: {
-            type: Number,
-        }
+      type:String,
+      
     },
     hourlyRate: {
         type: Number, // rate in currency per hour

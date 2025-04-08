@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faEnvelope, faPaw} from '@fortawesome/free-solid-svg-icons'
+import Box from '@mui/material/Box';
+import Badge from '@mui/material/Badge';
 
 const DogwalkerRegister = () => {
   const [formData, setFormData] = useState({
@@ -10,8 +12,7 @@ const DogwalkerRegister = () => {
     email: '',
     password: '',
     phone: '',
-    experience: '',
-    availability: [''],
+   
     image: '',
     description: '',
     hourlyRate: '',
@@ -20,11 +21,7 @@ const DogwalkerRegister = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'availability') {
-      setFormData({ ...formData, [name]: value.split(',').map(day => day.trim()) });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleRegister = async(e) => {
@@ -45,8 +42,6 @@ const DogwalkerRegister = () => {
       email: '',
       password: '',
       phone: '',
-      experience: '',
-      availability: [''],
       image: '',
       description: '',
       hourlyRate: '',
@@ -57,26 +52,29 @@ const DogwalkerRegister = () => {
       <div className="flex flex-col min-h-screen bg-gray-100">
                   {/* Header */}
                   <header className="w-full bg-[white] border-b border-gray-300 text-black flex items-center justify-between px-6 py-4 shadow-md">
-                          <div className="flex items-center">
-                            {/* <FaPaw className="text-2xl" /> */}
-                            
-                            <h1 className="text-3xl font-bold text-[#FFBD5C] pb-1">Pawpals <FontAwesomeIcon icon={faPaw} /></h1>
-                            &nbsp;&nbsp;&nbsp;&nbsp;
-                  
-                           <div className="opacity-50 hover:opacity-100 transition-opacity duration-300 mx-2"><i class="ri-heart-line mx-1"></i><a href="#become-sitter">Become a Sitter</a></div> 
-                            <div  className="opacity-50 hover:opacity-100 transition-opacity duration-300 mx-2"><i class="ri-service-line mx-1"></i><a href="#our-services" >Our Services</a></div>
-                            <div  className="opacity-50 hover:opacity-100 transition-opacity duration-300 mx-2"><i class="ri-question-line mx-1"></i><a href="#our-services" >Help</a></div>
-                          </div>
-                     
-                          {/* <div className="flex items-center space-x-4">
-                            <img
-                              src="https://img.freepik.com/premium-vector/cute-dog-logo-vector-sticker_622550-2401.jpg?w=826" // Replace with the actual user image path
-                              alt="User"
-                              className="w-12 h-12 rounded-full border-2 border-white"
-                            />
-                           
-                          </div> */}
-                        </header>
+                                 <div className="flex items-center">
+                                   <h1 className=" text-3xl font-[Open_Sans]">pawpals</h1>
+                                   &nbsp;&nbsp;&nbsp;&nbsp;
+                                 </div>
+                                 <div className="flex items-center space-x-2">
+                                  
+                                   <div><a href="#our-services">
+                                     <Box sx={{ color: 'action.active' }}>
+                                       <Badge color="primary" variant="dot">
+                                         <i className=" text-black ri-chat-4-line"></i>
+                                       </Badge>
+                                     </Box>
+                                   </a></div>
+                                   <div><a href="#our-services">
+                                     <Box sx={{ color: 'action.active' }}>
+                                       <Badge badgeContent={4} color="primary">
+                                         <i className="text-black ri-notification-2-line "></i>
+                                       </Badge>
+                                     </Box>
+                                   </a></div>
+                                  
+                                 </div>
+                               </header>
     <div className="flex min-h-screen">
       {/* Left Side: Registration Form */}
       <div className="w-1/2 flex flex-col items-center justify-center bg-white text-black">
@@ -119,79 +117,49 @@ const DogwalkerRegister = () => {
                   required
                 />
               </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 mt-1 border border-grey rounded-md hover:border-black"
-                  placeholder="Enter your password"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium">
-                  Phone
-                </label>
-                <input
-                  type="text"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 mt-1 border border-grey rounded-md hover:border-black"
-                  placeholder="Enter your phone number"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="experience" className="block text-sm font-medium">
-                  Experience (Years)
-                </label>
-                <input
-                  type="number"
-                  id="experience"
-                  name="experience"
-                  value={formData.experience}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 mt-1 border border-grey rounded-md hover:border-black"
-                  placeholder="Enter your experience"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="hourlyRate" className="block text-sm font-medium">
-                  Hourly Rate
-                </label>
-                <input
-                  type="number"
-                  id="hourlyRate"
-                  name="hourlyRate"
-                  value={formData.hourlyRate}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 mt-1 border border-grey rounded-md hover:border-black"
-                  placeholder="Enter your hourly rate"
-                  required
-                />
-              </div>
             </div>
             <div>
-              <label htmlFor="availability" className="block text-sm font-medium">
-                Availability
+              <label htmlFor="password" className="block text-sm font-medium">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-4 py-2 mt-1 border border-grey rounded-md hover:border-black"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium">
+                Phone
               </label>
               <input
                 type="text"
-                id="availability"
-                name="availability"
-                value={formData.availability.join(', ')}
+                id="phone"
+                name="phone"
+                value={formData.phone}
                 onChange={handleChange}
                 className="w-full px-4 py-2 mt-1 border border-grey rounded-md hover:border-black"
-                placeholder="Enter your availability (e.g., Monday, Wednesday)"
+                placeholder="Enter your phone number"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="hourlyRate" className="block text-sm font-medium">
+                Hourly Rate
+              </label>
+              <input
+                type="number"
+                id="hourlyRate"
+                name="hourlyRate"
+                value={formData.hourlyRate}
+                onChange={handleChange}
+                className="w-full px-4 py-2 mt-1 border border-grey rounded-md hover:border-black"
+                placeholder="Enter your hourly rate"
                 required
               />
             </div>
@@ -226,7 +194,7 @@ const DogwalkerRegister = () => {
             </div>
             <button
               type="submit"
-              className="w-full px-4 py-2 font-bold text-white bg-[#FFBD5C] rounded-md hover:bg-[#E7EEF8]"
+              className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
             >
               Register
             </button>
@@ -235,7 +203,7 @@ const DogwalkerRegister = () => {
             Already have a petwalker account?{' '}
             <button
               onClick={() => navigate('/dogwalker-login')}
-              className="font-medium text-[#FFBD5C] underline hover:text-[#E7EEF8]"
+              className="font-medium  text-blue-500 rounded-md hover:text-blue-600"
             >
               Login here
             </button>

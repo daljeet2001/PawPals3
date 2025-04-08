@@ -11,6 +11,7 @@ router.post('/register',
     body('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
     body('email').isEmail().withMessage('Email must be a valid email address'),
     body('password').isLength({ min: 3 }).withMessage('Password must be at least 3 characters long'),
+    body('profileImage').isString().withMessage('Profile image must be a string'),
     body('dog').isObject().withMessage('Dog must be an object'),
     userController.createUserController);
 

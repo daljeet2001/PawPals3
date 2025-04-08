@@ -9,9 +9,6 @@ router.post('/register', [
     body('email').isEmail().withMessage('Invalid Email'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
     body('phone').isLength({ min: 10 }).withMessage('Phone number must be at least 10 digits long'),
-    body('experience').isNumeric().withMessage('Experience must be a number'),
-    body('availability').isArray().withMessage('Availability must be an array of strings'),
-    body('availability.*').isString().withMessage('Each availability must be a string'),
     body('description').isLength({ max: 200 }).withMessage('Description must not be longer than 200 characters'),
     body('hourlyRate').isNumeric().withMessage('Hourly rate must be a number'),
     body('image').isString().withMessage('Image URL must be a string'),
@@ -30,7 +27,10 @@ router.get('/profile', authMiddleware.authDogwalker, dogwalkerController.getDogw
 
 router.get('/logout', authMiddleware.authDogwalker, dogwalkerController.logoutDogwalker)
 
+router.post('/filter', [
+    body('hourlyRatelow').optional().isNumeric().withMessage('Hourly rate must be a number'),
+    body('hourlyRatehigh').optional().isNumeric().withMessage('Hourly rate must be a number'),
 
-
+], dogwalkerController.filterDogwalkers);
 
 export default router;

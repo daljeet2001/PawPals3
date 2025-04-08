@@ -3,11 +3,11 @@ import userModel from '../models/user.model.js';
 
 
 export const createUser = async ({
-    username, email, password, dog
+    username, email, password,profileImage,dog
 }) => {
 
-    if (!username || !email || !password || !dog) {
-        throw new Error('Username, email, password, and dog are required');
+    if (!username || !email || !password || !profileImage || !dog) {
+        throw new Error('Username, email, password, profileImage and dog are required');
     }
 
     const hashedPassword = await userModel.hashPassword(password);
@@ -16,6 +16,7 @@ export const createUser = async ({
         username,
         email,
         password: hashedPassword,
+        profileImage,
         dog
     });
     console.log(user);

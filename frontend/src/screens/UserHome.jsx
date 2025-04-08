@@ -5,6 +5,7 @@ import {faEnvelope, faPaw} from '@fortawesome/free-solid-svg-icons'
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
+import axios from 'axios';
 
 import Badge from '@mui/material/Badge';
 
@@ -12,7 +13,7 @@ import Badge from '@mui/material/Badge';
 const UserHome = () => {
   const [filters, setFilters] = useState({
     location: '',
-    service: '',
+    service: 'Dog walking',
     startDate: '',
     endDate: '',
     walkersPerDay: '',
@@ -20,7 +21,7 @@ const UserHome = () => {
   });
 
 
-  
+  const [filterdogwalkers,setFilterDogWalkers] = useState([]);
  
   const [value, setValue] = React.useState([100, 1000]);
 
@@ -42,10 +43,20 @@ const UserHome = () => {
   };
 
  
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log('Filters:', filters);
-    // Add logic to filter dogwalkers based on filters
+   
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/dogwalker/filter`, {
+      hourlyRatelow: value[0],
+      hourlyRatehigh: value[1],
+      });
+      console.log('Filtered Dog Walkers:', response.data);
+      setFilterDogWalkers(response.data);
+    } catch (error) {
+      console.error('Error fetching filtered dog walkers:', error);
+    }
+    
   };
 
   return (
@@ -53,42 +64,25 @@ const UserHome = () => {
       {/* Header */}
       <header className="w-full bg-[white] border-b border-gray-300 text-black flex items-center justify-between px-6 py-4 shadow-md">
         <div className="flex items-center">
-          {/* <FaPaw className="text-2xl" /> */}
-          
-          <h1 className="text-3xl font-bold text-[#FFBD5C] pb-1">Pawpals <FontAwesomeIcon icon={faPaw} /></h1>
+          <h1 className=" text-3xl font-[Open_Sans]">pawpals</h1>
           &nbsp;&nbsp;&nbsp;&nbsp;
-
-         <div className="opacity-50 hover:opacity-100 transition-opacity duration-300 mx-2"><i class="ri-heart-line mx-1"></i><a href="#become-sitter">Become a Sitter</a></div> 
-          <div  className="opacity-50 hover:opacity-100 transition-opacity duration-300 mx-2"><i class="ri-service-line mx-1"></i><a href="#our-services" >Our Services</a></div>
-          <div  className="opacity-50 hover:opacity-100 transition-opacity duration-300 mx-2"><i class="ri-question-line mx-1"></i><a href="#our-services" >Help</a></div>
         </div>
-   
         <div className="flex items-center space-x-2">
-          <div className="flex items-center space-x-2">
-           <img  className="w-8 h-8 rounded-full object-cover"src="https://i.pinimg.com/736x/8a/9d/08/8a9d08eb9fba8bcce7c6746a49df9dfc.jpg" alt="?"/>
-           <a href="#profile"><p className="opacity-50 hover:opacity-100 transition-opacity duration-300">Daljeet</p></a></div>
-
-           <div><a href="#our-services">
-          
-            
-           
+         
+          <div><a href="#our-services">
             <Box sx={{ color: 'action.active' }}>
-      <Badge color="primary" variant="dot">
-      <i className=" opacity-70 hover:opacity-100 transition-opacity duration-300 ri-chat-4-line"></i>
-      </Badge>
-    </Box>
-
-            </a></div>
-           
-           <div  ><a href="#our-services">
-           <Box sx={{ color: 'action.active' }}>
-           <Badge badgeContent={4} color="primary">
-           <i className="ri-notification-2-line opacity-70 hover:opacity-100 transition-opacity duration-300"></i>
-</Badge>
-    </Box>
-            </a></div>
-          
-
+              <Badge color="primary" variant="dot">
+                <i className=" text-black ri-chat-4-line"></i>
+              </Badge>
+            </Box>
+          </a></div>
+          <div><a href="#our-services">
+            <Box sx={{ color: 'action.active' }}>
+              <Badge badgeContent={4} color="primary">
+                <i className="text-black ri-notification-2-line "></i>
+              </Badge>
+            </Box>
+          </a></div>
          
         </div>
       </header>
@@ -225,7 +219,7 @@ const UserHome = () => {
               <div className="col-span-2">
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 font-bold text-white bg-[#FFBD5C] rounded-md hover:bg-[#E7EEF8]"
+                  className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
                 >
                   Search
                 </button>
@@ -234,162 +228,48 @@ const UserHome = () => {
           </div>
         </div>
 
-        {/* Center Section: List of Pet Walkers */} 
-        <div className="w-3/6 flex flex-col justify-start bg-white p-4 mr-1 overflow-y-auto" >
-    <h2 className="text-2xl font-medium">  <i class="ri-map-pin-line mr-1"></i>Sitters in your area</h2>
-    <div className="flex"><h4 className="text-gray-500 mr-1">You're seeing sitters available on</h4> <p className="text-gray-800 font-medium">Apr 10</p></div>
+        {/* Center Section: List of Pet Walkers */}
+        <div className="w-3/6 flex flex-col justify-start bg-white p-4 mr-1 overflow-y-auto">
+          <h2 className="text-2xl font-medium">  <i class="ri-map-pin-line mr-1"></i>Sitters in your area</h2>
+          <div className="flex"><h4 className="text-gray-500 mr-1">You're seeing sitters available on</h4> <p className="text-gray-800 font-medium">Apr 10</p></div>
           <div className="w-full space-y-4">
-          <div className="p-4 bg-white rounded-lg shadow-md border-t border-gray-300 mt-4">
-  {/* Top row: Profile picture + Name on left, Rate on right */}
-  <div className="flex justify-between items-center">
-    <div className="flex items-center space-x-4">
-      <img
-        src="https://c8.alamy.com/comp/R90YJ8/punjabi-man-R90YJ8.jpg"
-        alt="Profile"
-        className="w-12 h-12 rounded-full object-cover"
-      />
-      <h3 className="text-lg font-semibold">Daljeet Singh</h3>
-    </div>
-    <div>
-    <span>from</span><p className="text-right font-semibold text-green-600">₹350 / walk</p>
-    </div>
-  </div>
+            {filterdogwalkers.map((walker, index) => (
+              <div key={index} className="p-4 bg-white rounded-lg shadow-md border-t border-gray-300 mt-4">
+                {/* Top row: Profile picture + Name on left, Rate on right */}
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-4">
+                    <img
+                      src={walker.image || "https://via.placeholder.com/150"}
+                      alt="Profile"
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <h3 className="text-lg font-semibold">{walker.name}</h3>
+                  </div>
+                  <div>
+                    <span>from</span>
+                    <p className="text-right font-semibold text-green-600">₹{walker.hourlyRate} / walk</p>
+                  </div>
+                </div>
 
-  {/* Contact Details */}
-  <div className="mt-3 text-sm text-gray-700">
-    <p><strong>Email:</strong> daljeet@gmail.com</p>
-    <p><strong>Phone:</strong> +91-9876543210</p>
-    <p><strong>Location:</strong> New York</p>
-  </div>
+                {/* Contact Details */}
+                <div className="mt-3 text-sm text-gray-700">
+                  <p><strong>Email:</strong> {walker.email}</p>
+                  <p><strong>Phone:</strong> {walker.phone}</p>
+                  <p><strong>Location:</strong> {walker.location || "Chandigarh"}</p>
+                </div>
 
-  {/* Reviews */}
-  <div className="mt-3">
-    <p className="text-sm text-yellow-500">⭐️⭐️⭐️⭐️☆ (4.0)</p>
-    <p className="text-xs text-gray-500">"daljeet is amazing with dogs! My lab loves him."</p>
-  </div>
+                {/* Reviews */}
+                <div className="mt-3">
+                  <p className="text-sm text-yellow-500">⭐️⭐️⭐️⭐️☆ ({walker.rating || "N/A"})</p>
+                  <p className="text-xs text-gray-500">{walker.review || "No reviews available."}</p>
+                </div>
 
-  {/* Description */}
-  <div className="mt-3 text-sm text-gray-800">
-    <p>
-      daljeet is a dedicated and experienced dog walker who loves spending time with animals.
-      He specializes in large breed dogs and provides regular updates during walks.
-    </p>
-  </div>
-</div>
-<div className="p-4 bg-white rounded-lg shadow-md border-t border-gray-300 mt-4">
-  {/* Top row: Profile picture + Name on left, Rate on right */}
-  <div className="flex justify-between items-center">
-    <div className="flex items-center space-x-4">
-      <img
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEI6IvIehxnjb2X5T0zqeGPKKExEX1g_mybPOI3NGzYN8p-MvpjPSVaOsM1IZ5dKvGSEA&usqp=CAU"
-        alt="Profile"
-        className="w-12 h-12 rounded-full object-cover"
-      />
-      <h3 className="text-lg font-semibold">Taranjeet Singh</h3>
-    </div>
-    <div>
-      <span>from</span><p className="text-right font-semibold text-green-600">₹200 / walk</p>
-    </div>
-  </div>
-
-  {/* Contact Details */}
-  <div className="mt-3 text-sm text-gray-700">
-    <p><strong>Email:</strong> taranjeet@gmail.com</p>
-    <p><strong>Phone:</strong> +91-9876543210</p>
-    <p><strong>Location:</strong> New York</p>
-  </div>
-
-  {/* Reviews */}
-  <div className="mt-3">
-    <p className="text-sm text-yellow-500">⭐️⭐️⭐️⭐️☆ (4.0)</p>
-    <p className="text-xs text-gray-500">"Taranjeet is amazing with dogs! My lab loves him."</p>
-  </div>
-
-  {/* Description */}
-  <div className="mt-3 text-sm text-gray-800">
-    <p>
-      Taranjeet is a dedicated and experienced dog walker who loves spending time with animals.
-      He specializes in large breed dogs and provides regular updates during walks.
-    </p>
-  </div>
-</div>
-
-<div className="p-4 bg-white rounded-lg shadow-md border-t border-gray-300 mt-4">
-  {/* Top row: Profile picture + Name on left, Rate on right */}
-  <div className="flex justify-between items-center">
-    <div className="flex items-center space-x-4">
-      <img
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmxKIynCBeIGCr74HUkAsTGrOhqcqj01hwlQ&s"
-        alt="Profile"
-        className="w-12 h-12 rounded-full object-cover"
-      />
-      <h3 className="text-lg font-semibold">Simran Singh</h3>
-    </div>
-    <div>
-    <span>from</span><p className="text-right font-semibold text-green-600">₹499 / walk</p>
-    </div>
-  </div>
-
-  {/* Contact Details */}
-  <div className="mt-3 text-sm text-gray-700">
-    <p><strong>Email:</strong> simran@gmail.com</p>
-    <p><strong>Phone:</strong> +91-9876543210</p>
-    <p><strong>Location:</strong> New York</p>
-  </div>
-
-  {/* Reviews */}
-  <div className="mt-3">
-    <p className="text-sm text-yellow-500">⭐️⭐️⭐️⭐️☆ (4.0)</p>
-    <p className="text-xs text-gray-500">"Simran is amazing with dogs! My lab loves him."</p>
-  </div>
-
-  {/* Description */}
-  <div className="mt-3 text-sm text-gray-800">
-    <p>
-      Simran is a dedicated and experienced dog walker who loves spending time with animals.
-      He specializes in large breed dogs and provides regular updates during walks.
-    </p>
-  </div>
-</div>
-
-<div className="p-4 bg-white rounded-lg shadow-md border-t border-gray-300 mt-4">
-  {/* Top row: Profile picture + Name on left, Rate on right */}
-  <div className="flex justify-between items-center">
-    <div className="flex items-center space-x-4">
-      <img
-        src="https://c8.alamy.com/comp/R90YJ8/punjabi-man-R90YJ8.jpg"
-        alt="Profile"
-        className="w-12 h-12 rounded-full object-cover"
-      />
-      <h3 className="text-lg font-semibold">Inderjeet Singh</h3>
-    </div>
-    <div>
-    <span>from</span><p className="text-right font-semibold text-green-600">₹399/ walk</p>
-    </div>
-  </div>
-
-  {/* Contact Details */}
-  <div className="mt-3 text-sm text-gray-700">
-    <p><strong>Email:</strong> inderjeet@gmail.com</p>
-    <p><strong>Phone:</strong> +91-9876543210</p>
-    <p><strong>Location:</strong> New York</p>
-  </div>
-
-  {/* Reviews */}
-  <div className="mt-3">
-    <p className="text-sm text-yellow-500">⭐️⭐️⭐️⭐️☆ (4.0)</p>
-    <p className="text-xs text-gray-500">"Inderjeet is amazing with dogs! My lab loves him."</p>
-  </div>
-
-  {/* Description */}
-  <div className="mt-3 text-sm text-gray-800">
-    <p>
-      Inderjeet is a dedicated and experienced dog walker who loves spending time with animals.
-      He specializes in large breed dogs and provides regular updates during walks.
-    </p>
-  </div>
-</div>
-
+                {/* Description */}
+                <div className="mt-3 text-sm text-gray-800">
+                  <p>{walker.description || "No description available."}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

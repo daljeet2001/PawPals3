@@ -9,7 +9,7 @@ export const registerDogwalker = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, phone, experience, availability, description, hourlyRate,image } = req.body;
+    const { name, email, password, phone, description, hourlyRate,image } = req.body;
 
     const isDogwalkerAlreadyExist = await dogwalkerModel.findOne({ email });
 
@@ -24,8 +24,6 @@ export const registerDogwalker = async (req, res, next) => {
         email,
         password: hashedPassword,
         phone,
-        experience,
-        availability,
         description,
         hourlyRate,
         image
@@ -77,27 +75,25 @@ export const logoutDogwalker = async (req, res, next) => {
     res.status(200).json({ message: 'Logout successfully' });
 }
 
-// module.exports.getCaptainsInTheRadius = async (req, res) => {
-//     const { ltd, lng, radius } = req.query;
+export const filterDogwalkers = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
 
-//     if (!ltd || !lng || !radius) {
-//         return res.status(400).send('Latitude, longitude, and radius are required');
-//     }
-//     // console.log('ltd', ltd, 'lng', lng, 'radius', radius);
-//     //        res.status(200).send('ok');
-
-//     try {
-//         const captains = await captainModel.find({
-//             location: {
-//                 $geoWithin: {
-//                     $centerSphere: [[ltd, lng], radius / 6371]
-//                 }
-//             }
-//         });
-//         res.json(captains);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).send('Internal Server Error');
-//     }
-// };
+    const { hourlyRatelow, hourlyRatehigh } = req.body;
+    const query = {};
+    if (hourlyRatelow || hourlyRatehigh) {
+    query.hourlyRate = {};
+    if (hourlyRatelow) query.hourlyRate.$gte = Number(hourlyRatelow);
+    if (hourlyRatehigh) query.hourlyRate.$lte = Number(hourlyRatehigh);
+}
+    try {
+        const dogwalkers = await dogwalkerModel.find(query);
+        res.status(200).json(dogwalkers);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
 
