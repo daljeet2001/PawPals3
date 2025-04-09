@@ -33,4 +33,9 @@ router.post('/filter', [
 
 ], dogwalkerController.filterDogwalkers);
 
+router.post('/availability', authMiddleware.authDogwalker, [
+    body('dates').isArray().withMessage('Dates must be an array of strings'),
+    body('dogwalkerId').isString().withMessage('Dogwalker ID must be a string'),
+], dogwalkerController.setAvailability);
+
 export default router;

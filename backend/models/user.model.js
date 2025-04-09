@@ -32,6 +32,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    socketId: {
+        type: String,
+    },
+    location: {
+        ltd: {
+            type: Number,
+        },
+        lng: {
+            type: Number,
+        }
+      
+    },
 
     dog: {
         dogname: {
@@ -39,10 +51,7 @@ const userSchema = new mongoose.Schema({
             required: true,
             trim: true,
         },
-        dogImage:{
-            type:String,
-            required: true,
-         },
+       
         gender: {
             type: String,
             required: true,

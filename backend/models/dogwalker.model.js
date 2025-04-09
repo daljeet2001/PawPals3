@@ -27,6 +27,9 @@ const DogWalkerSchema = new mongoose.Schema({
         type: [String], // e.g., ['Monday', 'Wednesday', 'Friday']
        
     },
+    socketId: {
+        type: String,
+    },
 
     image: {
         type: String, // URL or path to the image

@@ -5,11 +5,13 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faEnvelope, faPaw} from '@fortawesome/free-solid-svg-icons'
 import Box from '@mui/material/Box';
 import Badge from '@mui/material/Badge';
+import { DogwalkerDataContext } from '../context/DogwalkerContext';
 
 const DogwalkerLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const{Dogwalker, SetDogwalker}=React.useContext(DogwalkerDataContext)
   
     const handleLogin = async(e) => {
       e.preventDefault();
@@ -24,6 +26,7 @@ const DogwalkerLogin = () => {
       if(response.status===200){
         const data=response.data
         console.log(data)
+        SetDogwalker(data.dogwalker)
         localStorage.setItem('token', data.token)
         navigate('/dogwalker-home')
       console.log('Logging in with:', { email, password });

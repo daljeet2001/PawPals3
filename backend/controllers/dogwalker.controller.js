@@ -99,3 +99,30 @@ export const filterDogwalkers = async (req, res, next) => {
     }
 };
 
+export const setAvailability = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { dates,dogwalkerId } = req.body;
+    
+
+    try {
+        const dogwalker = await dogwalkerModel.findByIdAndUpdate(
+            dogwalkerId,
+            { availability: dates },
+            { new: true }
+        );
+
+        if (!dogwalker) {
+            return res.status(404).json({ message: 'Dogwalker not found' });
+        }
+
+        res.status(200).json({ message: 'Availability updated successfully', dogwalker });
+    } catch (error) {
+        console.error('Error updating availability:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+

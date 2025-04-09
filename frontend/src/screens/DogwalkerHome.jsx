@@ -1,13 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState,useContext,useEffect } from 'react';
 import axios from 'axios'; // Import Axios
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faPaw, faStar, faBell } from '@fortawesome/free-solid-svg-icons';
 import Box from '@mui/material/Box';
 import Badge from '@mui/material/Badge';
+import { DogwalkerDataContext } from '../context/DogwalkerContext';
+import{ SocketContext} from '../context/SocketContext';
 
 const DogwalkerHome = () => {
   const [selectedDates, setSelectedDates] = useState([]);
   // console.log(selectedDates);
+  const {Dogwalker}=useContext(DogwalkerDataContext);
+  const { socket } = useContext(SocketContext);
+  console.log(Dogwalker);
+
+  useEffect(() => {
+    socket.emit('join', {
+        userId: Dogwalker._id,
+        userType: 'dogwalker'
+    })
+    const updateLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+
+                socket.emit('update-location-dogwalker', {
+                    userId: Dogwalker._id,
+                    location: {
+                        ltd: position.coords.latitude,
+                        lng: position.coords.longitude
+                    }
+                })
+            })
+        }
+    }
+
+    const locationInterval = setInterval(updateLocation, 10000)
+    updateLocation()
+
+    // return () => clearInterval(locationInterval)
+}, [])
 
 
   const toggleDateSelection = (date) => {
@@ -20,13 +51,15 @@ const DogwalkerHome = () => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/dogwalker/availability`, {
         dates: selectedDates,
-        // email:
+        dogwalkerId: Dogwalker._id,
+      }, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       });
       console.log('Availability confirmed:', response.data);
-      alert('Availability successfully updated!');
     } catch (error) {
       console.error('Error confirming availability:', error);
-      alert('Failed to update availability. Please try again.');
     }
   };
 
@@ -69,11 +102,11 @@ const DogwalkerHome = () => {
             <div className="flex items-center space-x-4 ml-2">
               <img
                 className="w-16 h-16 rounded-full object-cover"
-                src="https://c8.alamy.com/comp/AC0371/a-nihang-sikh-in-punjab-AC0371.jpg"
+                src={Dogwalker.image}
                 alt="Profile"
               />
               <div className="flex flex-col ml-2">
-                <p className="text-base font-semibold">Daljeet Singh</p>
+                <p className="text-base font-semibold">{Dogwalker.name}</p>
                 <a href="#edit profile" className="text-sm mt-1 opacity-50 hover:underline">
                   Edit Profile
                 </a>

@@ -5,6 +5,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faEnvelope, faPaw} from '@fortawesome/free-solid-svg-icons'
 import Box from '@mui/material/Box';
 import Badge from '@mui/material/Badge';
+import { UserDataContext } from '../context/User.Context';
 
 const UserRegsiter = () => {
   const [username, setUsername] = useState('');
@@ -20,6 +21,7 @@ const UserRegsiter = () => {
     dogImage: '', // Added image field
   });
   const navigate = useNavigate();
+    const{User, setUser}=React.useContext(UserDataContext)
 
   const handleRegister = async(e) => {
     e.preventDefault();
@@ -35,6 +37,7 @@ const UserRegsiter = () => {
     if(response.status===201){
       const data=response.data
       console.log(data)
+      setUser(data.user)
       localStorage.setItem('token', data.token)
       navigate('/home')
     }
@@ -99,7 +102,7 @@ const UserRegsiter = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="username" className="block text-sm font-medium">
-                  Username
+                  Name
                 </label>
                 <input
                   type="text"
@@ -233,19 +236,7 @@ const UserRegsiter = () => {
                 maxLength="200"
               />
             </div>
-            <div>
-              <label htmlFor="image" className="block text-sm font-medium">
-                Dog Image URL
-              </label>
-              <input
-                type="text"
-                id="image"
-                value={dog.dogImage}
-                onChange={(e) => handleDogChange('dogImage', e.target.value)}
-                className="w-full px-4 py-2 mt-1 border border-grey rounded-md hover:border-black"
-                placeholder="Enter your dog's image URL"
-              />
-            </div>
+   
             <button
               type="submit"
               className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"

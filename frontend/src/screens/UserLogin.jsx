@@ -5,11 +5,13 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faEnvelope, faPaw} from '@fortawesome/free-solid-svg-icons'
 import Box from '@mui/material/Box';
 import Badge from '@mui/material/Badge';
+import { UserDataContext } from '../context/User.Context';
 
 const UserLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const{User, setUser}=React.useContext(UserDataContext)
 
   const handleLogin = async(e) => {
     e.preventDefault();
@@ -22,10 +24,11 @@ const UserLogin = () => {
     if(response.status===200){
       const data=response.data
       console.log(data)
+      setUser(data.user)
       localStorage.setItem('token', data.token)
       navigate('/home')
     }
-    console.log('Logging in with:', { email, password });
+    // console.log('Logging in with:', { email, password });
   };
 
   return (

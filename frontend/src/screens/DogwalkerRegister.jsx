@@ -5,6 +5,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faEnvelope, faPaw} from '@fortawesome/free-solid-svg-icons'
 import Box from '@mui/material/Box';
 import Badge from '@mui/material/Badge';
+import { DogwalkerDataContext } from '../context/DogwalkerContext';
 
 const DogwalkerRegister = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ const DogwalkerRegister = () => {
     description: '',
     hourlyRate: '',
   });
+  const{Dogwalker, SetDogwalker}=React.useContext(DogwalkerDataContext)
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -33,6 +35,7 @@ const DogwalkerRegister = () => {
     if(response.status===201){
       const data=response.data
       console.log(data)
+      SetDogwalker(data.dogwalker)
       localStorage.setItem('token', data.token)
       navigate('/dogwalker-home')
     console.log('Registering with:', formData);
@@ -134,6 +137,20 @@ const DogwalkerRegister = () => {
               />
             </div>
             <div>
+              <label htmlFor="image" className="block text-sm font-medium">
+                Profile Image URL
+              </label>
+              <input
+                type="text"
+                id="image"
+                name="image"
+                value={formData.image}
+                onChange={handleChange}
+                className="w-full px-4 py-2 mt-1 border border-grey rounded-md hover:border-black"
+                placeholder="Enter image URL"
+              />
+            </div>
+            <div>
               <label htmlFor="phone" className="block text-sm font-medium">
                 Phone
               </label>
@@ -178,20 +195,7 @@ const DogwalkerRegister = () => {
                 required
               />
             </div>
-            <div>
-              <label htmlFor="image" className="block text-sm font-medium">
-                Profile Image URL
-              </label>
-              <input
-                type="text"
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                className="w-full px-4 py-2 mt-1 border border-grey rounded-md hover:border-black"
-                placeholder="Enter image URL"
-              />
-            </div>
+         
             <button
               type="submit"
               className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
