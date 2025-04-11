@@ -1,45 +1,72 @@
-import React, { useState,useContext,useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios'; // Import Axios
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faPaw, faStar, faBell } from '@fortawesome/free-solid-svg-icons';
 import Box from '@mui/material/Box';
 import Badge from '@mui/material/Badge';
 import { DogwalkerDataContext } from '../context/DogwalkerContext';
-import{ SocketContext} from '../context/SocketContext';
+import { SocketContext } from '../context/SocketContext';
 
 const DogwalkerHome = () => {
   const [selectedDates, setSelectedDates] = useState([]);
-  // console.log(selectedDates);
-  const {Dogwalker}=useContext(DogwalkerDataContext);
+  const [upcomingBookings, setUpcomingBookings] = useState([]);
+  const { Dogwalker } = useContext(DogwalkerDataContext);
   const { socket } = useContext(SocketContext);
-  console.log(Dogwalker);
+  // console.log(Dogwalker);
+
+  useEffect(()=>{
+     // Listen for the "new-request" event
+     socket.on('new-request', (data) => {
+      console.log('New booking request received:', data);
+      setUpcomingBookings((prev) => [
+        ...prev,
+        {
+          date: data.filters.startDate,
+          time: data.filters.timeNeeded,
+          service: data.filters.service,
+          client: data.user.name,
+        },
+      ]);
+     
+    });
+    return() => {
+      socket.off('new-request'); // Ensure cleanup
+    };
+
+  },[]);
 
   useEffect(() => {
     socket.emit('join', {
-        userId: Dogwalker._id,
-        userType: 'dogwalker'
-    })
+      userId: Dogwalker._id,
+      userType: 'dogwalker',
+    });
+
     const updateLocation = () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          socket.emit('update-location-dogwalker', {
+            userId: Dogwalker._id,
+            location: {
+              ltd: position.coords.latitude,
+              lng: position.coords.longitude,
+            },
+          });
+        });
+      }
+    };
 
-                socket.emit('update-location-dogwalker', {
-                    userId: Dogwalker._id,
-                    location: {
-                        ltd: position.coords.latitude,
-                        lng: position.coords.longitude
-                    }
-                })
-            })
-        }
-    }
+    const locationInterval = setInterval(updateLocation, 10000);
+    updateLocation();
 
-    const locationInterval = setInterval(updateLocation, 10000)
-    updateLocation()
+   
+    // console.log("hello")
+   
 
-    // return () => clearInterval(locationInterval)
-}, [])
-
+    return () => {
+      clearInterval(locationInterval);
+      
+    };
+  }, [ Dogwalker._id]);
 
   const toggleDateSelection = (date) => {
     setSelectedDates((prev) =>
@@ -49,14 +76,18 @@ const DogwalkerHome = () => {
 
   const confirmAvailability = async () => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/dogwalker/availability`, {
-        dates: selectedDates,
-        dogwalkerId: Dogwalker._id,
-      }, {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/dogwalker/availability`,
+        {
+          dates: selectedDates,
+          dogwalkerId: Dogwalker._id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
         }
-      });
+      );
       console.log('Availability confirmed:', response.data);
     } catch (error) {
       console.error('Error confirming availability:', error);
@@ -287,11 +318,7 @@ const DogwalkerHome = () => {
             <h2 className="text-2xl font-bold mb-2">Upcoming Bookings</h2>
             <p className="font-normal opacity-50 mb-4">Here are your upcoming bookings for the next week:</p>
             <div className="flex flex-col space-y-4">
-              {[
-                { date: "12/04", time: "10:00 AM", service: "Dog Walking", client: "Daljeet Singh" },
-                { date: "13/04", time: "02:00 PM", service: "House Sitting", client: "Taranjeet Singh" },
-                { date: "14/04", time: "09:00 AM", service: "Drop-In Visit", client: "Simran Singh" },
-              ].map((booking, index) => (
+              {upcomingBookings.map((booking, index) => (
                 <div
                   key={index}
                   className="flex flex-col p-3 border border-gray-300 rounded-md hover:bg-gray-100"
@@ -310,8 +337,8 @@ const DogwalkerHome = () => {
                     <button className="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600">
                       Accept
                     </button>
-                    <button className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600">
-                      Completed
+                    <button className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600">
+                      Decline
                     </button>
                   </div>
                 </div>

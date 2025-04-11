@@ -29,6 +29,8 @@ const UserHome = () => {
 
   const [addresses, setAddresses] = useState({});
 
+ 
+
 useEffect(() => {
   const fetchAddresses = async () => {
     const newAddresses = {};
@@ -390,7 +392,7 @@ useEffect(() => {
           </h2>
           <div className="flex">
             <h4 className="text-gray-500 mr-1">You're seeing sitters available on</h4>{' '}
-            <p className="text-gray-800 font-medium">Apr 10</p>
+            <p className="text-gray-800 font-medium">{filters.startDate}</p>
           </div>
           <div className="w-full space-y-4">
             {filterdogwalkers.map((walker, index) => (
@@ -425,8 +427,7 @@ useEffect(() => {
                     <strong>Phone:</strong> {walker.phone}
                   </p>
                   <p>
-                    {/* <strong>Location:</strong> {walker.location || 'Chandigarh'} */}
-                    <strong>Location:{addresses[walker._id] || 'Loading...'}</strong> 
+                    <strong>Location:</strong> {addresses[walker._id] || 'Loading...'}
                   </p>
                 </div>
 
@@ -443,6 +444,35 @@ useEffect(() => {
                 {/* Description */}
                 <div className="mt-3 text-sm text-gray-800">
                   <p>{walker.description || 'No description available.'}</p>
+                </div>
+
+                {/* Send Request Button */}
+                <div className="mt-4">
+                  <button
+                    className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                    onClick={() => {
+                      socket.emit('new-request', {
+                        user: {
+                          id: User._id,
+                          name: User.username,
+                          profileImage: User.profileImage,
+                        },
+                        filters: {
+                          location: filters.location,
+                          service: filters.service,
+                          startDate: filters.startDate,
+                          endDate: filters.endDate,
+                          timeNeeded: filters.timeNeeded,
+                          rateRange: value,
+                        },
+                        dogwalkerId: walker._id,
+                      
+                      });
+                      console.log(`Request sent to ${walker.name}`);
+                    }}
+                  >
+                    Send Request
+                  </button>
                 </div>
               </div>
             ))}
