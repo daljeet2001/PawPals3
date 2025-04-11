@@ -83,13 +83,25 @@ export const filterDogwalkers = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { hourlyRatelow, hourlyRatehigh } = req.body;
-    const query = {};
+    const { NearbyWalkers, dates, hourlyRatelow, hourlyRatehigh } = req.body;
+    const query = {
+        _id: { $in: NearbyWalkers.map(walker => walker._id) },
+    };
+
     if (hourlyRatelow || hourlyRatehigh) {
-    query.hourlyRate = {};
-    if (hourlyRatelow) query.hourlyRate.$gte = Number(hourlyRatelow);
-    if (hourlyRatehigh) query.hourlyRate.$lte = Number(hourlyRatehigh);
-}
+        query.hourlyRate = {};
+        if (hourlyRatelow) query.hourlyRate.$gte = Number(hourlyRatelow);
+        if (hourlyRatehigh) query.hourlyRate.$lte = Number(hourlyRatehigh);
+    }
+
+    if (dates && dates.length > 0) {
+        query.availability = {
+            // $all: dates.map(date => new Date(date)),
+             $in: dates 
+        };
+    }
+    // console.log("query", query);
+
     try {
         const dogwalkers = await dogwalkerModel.find(query);
         res.status(200).json(dogwalkers);

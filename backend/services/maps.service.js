@@ -73,15 +73,42 @@ export const getAutoCompleteSuggestions = async (input) => {
     }
 }
 
-// module.exports.getPetwalkersInRadius = async (ltd, lng, radius) => {
-//     const url = `${process.env.BASE_URL}/dogwalker/dogwalker-in-radius?ltd=${ltd}&lng=${lng}&radius=${radius}`;
-   
+export const getDogwalkersInRadius = async (ltd, lng, radius) => {
 
-//     try {
-//         const response = await axios.get(url);
-//         return response.data;
-//     } catch (error) {
-//         console.error(error);
-//         throw error;
-//     }
-// };
+    // radius in km
+
+
+    const nearbydogwalkers = await Dogwalker.find({
+        location: {
+            $geoWithin: {
+                $centerSphere: [ [ ltd, lng ], radius / 6371 ]
+            }
+        }
+    });
+
+    return nearbydogwalkers;
+
+
+}
+
+export const getAddressFromCoordinates = async (latitude, longitude) => {
+    const apiKey = process.env.GOOGLE_MAPS_API;
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
+
+    try {
+        const response = await axios.get(url);
+        if (response.data.status === 'OK') {
+            const address = response.data.results[0]?.formatted_address;
+            if (address) {
+                return address;
+            } else {
+                throw new Error('No address found for the given coordinates');
+            }
+        } else {
+            throw new Error('Unable to fetch address');
+        }
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};

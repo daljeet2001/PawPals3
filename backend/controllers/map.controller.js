@@ -58,3 +58,37 @@ export const getAutoCompleteSuggestions = async (req, res, next) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+export const getDogwalkersInRadius = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { ltd, lng, radius } = req.query;
+
+    try {
+        const dogwalkers = await mapService.getDogwalkersInRadius(parseFloat(ltd), parseFloat(lng), parseFloat(radius));
+        res.status(200).json(dogwalkers);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const getAddressFromCoordinates = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { ltd, lng } = req.query;
+
+    try {
+        const address = await mapService.getAddressFromCoordinates(parseFloat(ltd), parseFloat(lng));
+        res.status(200).json({ address });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};

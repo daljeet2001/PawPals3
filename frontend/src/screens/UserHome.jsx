@@ -27,6 +27,20 @@ const UserHome = () => {
   const [value, setValue] = useState([100, 1000]);
   const [locationSuggestions, setLocationSuggestions] = useState([]);
 
+  const [addresses, setAddresses] = useState({});
+
+useEffect(() => {
+  const fetchAddresses = async () => {
+    const newAddresses = {};
+    for (let walker of filterdogwalkers) {
+      const address = await getAddressFromCoordinates(walker.location.ltd, walker.location.lng);
+      newAddresses[walker._id] = address;
+    }
+    setAddresses(newAddresses);
+  };
+  fetchAddresses();
+}, [filterdogwalkers]);
+
   useEffect(() => {
     socket.emit('join', {
       userId: User._id,
@@ -74,7 +88,7 @@ const UserHome = () => {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
-    console.log("response.data.suggestions", response.data);
+    // console.log("response.data.suggestions", response.data);
       setLocationSuggestions(response.data || []);
     } catch (error) {
       console.error('Error fetching location suggestions:', error);
@@ -96,11 +110,68 @@ const UserHome = () => {
     setLocationSuggestions([]);
   };
 
+  const getAddressFromCoordinates = async (latitude, longitude) => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/map/get-address`, {
+        params: { ltd: latitude, lng: longitude },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+       console.log('Address:', response.data.address);
+      return response.data.address;
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      return null;
+    }
+  };
+
+  function getDateRangeStrings(startDate, endDate) {
+    const dates = [];
+    let current = new Date(startDate);
+    const end = new Date(endDate);
+
+    while (current <= end) {
+        const day = String(current.getDate()).padStart(2, '0');
+        const month = String(current.getMonth() + 1).padStart(2, '0');
+        dates.push(`${day}/${month}`);
+        current.setDate(current.getDate() + 1);
+    }
+
+    return dates;
+}
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      const response1 = await axios.get(`${import.meta.env.VITE_BASE_URL}/map/get-coordinates`, {
+        params: { address: filters.location },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      console.log('Coordinates:', response1.data);
+
+      const response2 = await axios.get(`${import.meta.env.VITE_BASE_URL}/map/get-dogwalkers-in-radius`, {
+        params: {
+          ltd: response1.data.ltd,
+          lng: response1.data.lng,
+          radius: 20, // Example radius in km
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      console.log('Dog Walkers in Radius:', response2.data);
+
+      const dateRange = getDateRangeStrings(filters.startDate, filters.endDate);
+      // console.log('Date Range:', dateRange);
+
       const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/dogwalker/filter`, {
+        NearbyWalkers: response2.data,
+        dates: dateRange, // Pass dates as an array
         hourlyRatelow: value[0],
         hourlyRatehigh: value[1],
       });
@@ -354,7 +425,8 @@ const UserHome = () => {
                     <strong>Phone:</strong> {walker.phone}
                   </p>
                   <p>
-                    <strong>Location:</strong> {walker.location || 'Chandigarh'}
+                    {/* <strong>Location:</strong> {walker.location || 'Chandigarh'} */}
+                    <strong>Location:{addresses[walker._id] || 'Loading...'}</strong> 
                   </p>
                 </div>
 
@@ -379,7 +451,7 @@ const UserHome = () => {
 
         {/* Right Section: LiveTracking */}
         <div className="w-1/4 flex items-center justify-center bg-white h-screen sticky top-0 rounded-lg shadow-md  space-y-4 ">
-          <LiveTracking />
+          <LiveTracking filterdogwalkers={filterdogwalkers} /> 
         </div>
       </div>
     </div>

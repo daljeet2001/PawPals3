@@ -1,18 +1,43 @@
-import React from 'react';
+import React from "react";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 
-const LiveTracking = () => {
+const containerStyle = {
+  width: "100%",
+  height: "100%",
+};
+
+const center = {
+  lat: 30.65,
+  lng: 76.85,
+};
+
+const LiveTracking = ({ filterdogwalkers }) => {
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API, // 🔑 Using environment variable
+  });
+
+  if (!isLoaded) return <div>Loading map...</div>;
+
   return (
     <div className="w-full h-full rounded-lg shadow-lg overflow-hidden">
-      <iframe
-        title="Google Maps"
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d224345.8398390134!2d77.06889999999999!3d28.527280000000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce3a0a4d9e7b9%3A0x4b8b8b8b8b8b8b8b!2sDelhi%2C%20India!5e0!3m2!1sen!2sin!4v1696600000000!5m2!1sen!2sin"
-        width="100%"
-        height="100%"
-        style={{ border: 0 }}
-        allowFullScreen=""
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-      ></iframe>
+      <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
+        {filterdogwalkers.map((walker, index) => (
+          <Marker
+            key={index}
+            position={{
+              lat: walker.location.ltd,
+              lng: walker.location.lng,
+            }}
+            label={{
+              text: (index + 1).toString(),
+              color: "white",
+            }}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/grey-dot.png", // Grey marker icon
+            }}
+          />
+        ))}
+      </GoogleMap>
     </div>
   );
 };

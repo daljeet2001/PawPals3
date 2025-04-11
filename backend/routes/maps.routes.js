@@ -1,4 +1,3 @@
-
 import {Router} from 'express';
 import { query} from 'express-validator';
 import * as authMiddleware from '../middleware/auth.middleware.js';
@@ -25,5 +24,20 @@ router.get('/get-suggestions',
     authMiddleware.authUser,
     mapController.getAutoCompleteSuggestions
 )
+
+router.get('/get-dogwalkers-in-radius',
+    query('ltd').isFloat(),
+    query('lng').isFloat(),
+    query('radius').isFloat(),
+    authMiddleware.authUser,
+    mapController.getDogwalkersInRadius
+);
+
+router.get('/get-address',
+  query('ltd').isFloat().withMessage('Latitude must be a float'),
+  query('lng').isFloat().withMessage('Longitude must be a float'),
+  authMiddleware.authUser,
+  mapController.getAddressFromCoordinates
+);
 
 export default router;

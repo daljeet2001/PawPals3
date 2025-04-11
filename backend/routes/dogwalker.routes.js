@@ -28,9 +28,10 @@ router.get('/profile', authMiddleware.authDogwalker, dogwalkerController.getDogw
 router.get('/logout', authMiddleware.authDogwalker, dogwalkerController.logoutDogwalker)
 
 router.post('/filter', [
+    body('NearbyWalkers').isArray().withMessage('NearbyWalkers must be an array'),
+    body('dates').isArray().withMessage('Dates must be an array of strings'),
     body('hourlyRatelow').optional().isNumeric().withMessage('Hourly rate must be a number'),
     body('hourlyRatehigh').optional().isNumeric().withMessage('Hourly rate must be a number'),
-
 ], dogwalkerController.filterDogwalkers);
 
 router.post('/availability', authMiddleware.authDogwalker, [
