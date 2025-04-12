@@ -1,6 +1,7 @@
 import * as mapService from '../services/maps.service.js';
 import { validationResult } from 'express-validator';
-
+import dogwalkerModel from '../models/dogwalker.model.js';
+import {v4 as uuidv4} from 'uuid';
 
 export const getCoordinates = async (req, res, next) => {
     const errors = validationResult(req);
@@ -90,5 +91,44 @@ export const getAddressFromCoordinates = async (req, res, next) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const sendRequest = async (req, res) => {
+    try {
+        const user = JSON.parse(req.query.user);
+        const filters = JSON.parse(req.query.filters);
+        const dogwalkerId = req.query.dogwalkerId;
+
+        const time = filters.timeNeeded.split('to')[0].trim();
+        console.log('Received request:', { user, filters, dogwalkerId });
+
+        const booking = {
+            _id:uuidv4(),
+            date: filters.startDate,
+            time: time,
+            service: filters.service,
+            client: user.name,
+            status: 'pending',
+        };
+        // console.log(booking);
+
+        // Find the dogwalker by ID
+        const dogwalker = await dogwalkerModel.findById(dogwalkerId);
+
+        if (!dogwalker) {
+            console.error('Dogwalker not found');
+            return res.status(404).json({ message: 'Dogwalker not found' });
+        }
+
+        // Update the dogwalker's upcoming bookings
+        dogwalker.upcomingBookings.push(booking);
+        await dogwalker.save();
+
+        console.log('Booking saved successfully');
+        res.status(200).json({ message: 'Booking saved successfully' });
+    } catch (error) {
+        console.error('Error processing request:', error);
+        res.status(500).json({ message: 'Error saving booking' });
     }
 };

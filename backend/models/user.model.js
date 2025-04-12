@@ -44,6 +44,10 @@ const userSchema = new mongoose.Schema({
         }
       
     },
+    notifications: {
+        type: [Object],
+        default: [],
+    },
 
     dog: {
         dogname: {
@@ -72,6 +76,7 @@ const userSchema = new mongoose.Schema({
             trim: true,
             maxLength: [200, 'Description must not be longer than 200 characters'],
         },
+    
     },
 })
 

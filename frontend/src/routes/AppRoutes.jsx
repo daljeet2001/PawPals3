@@ -6,6 +6,7 @@ import DogwalkerLogin from '../screens/DogwalkerLogin'
 import DogwalkerRegister from '../screens/DogwalkerRegister'
 import UserHome from '../screens/UserHome'
 import DogwalkerHome from '../screens/DogwalkerHome'
+import Inbox from '../screens/inbox'
 
 
 const AppRoutes = () => {
@@ -19,6 +20,7 @@ const AppRoutes = () => {
                 <Route path="/dogwalker-register" element={<DogwalkerRegister />} />
                 <Route path="/home" element={<UserHome />} />
                 <Route path="/dogwalker-home" element={<DogwalkerHome />} />
+                <Route path="/inbox" element={<Inbox />} />
             </Routes>
 
         </BrowserRouter>

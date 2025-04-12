@@ -40,6 +40,64 @@ function initializeSocket(server) {
             });
         });
 
+        socket.on('new-notification-user', async (data) => {
+            const { user, message, date } = data;
+            console.log('Notification data:', data);
+
+            if (!message || !user) {
+                return socket.emit('error', { message: 'Invalid notification data' });
+            }
+
+            try {
+                // Update the user with the new notification
+                const updatedDogwalker = await dogwalkerModel.findOneAndUpdate(
+                    { name: user }, // Match user by name
+                    { $push: { notifications: { message, date } } }, // Push the notification to the user's notifications array
+                    { new: true } // Return the updated document
+                );
+
+                if (!updatedDogwalker) {
+                    console.error('Dogwalker not found');
+                    return socket.emit('error', { message: 'Dogwalker not found' });
+                }
+                // console.log('Dogwalker user:', updatedDogwalker);
+
+                console.log('Notification added successfully to dogwalker:', updatedDogwalker.notifications);
+            } catch (error) {
+                console.error('Error updating user notifications:', error);
+            }
+        });
+
+    
+
+        socket.on('new-notification-dogwalker', async (data) => {
+            const { user, message, date } = data;
+            // console.log('Notification data:', data);
+
+            if (!message || !user) {
+                return socket.emit('error', { message: 'Invalid notification data' });
+            }
+
+            try {
+                // Update the user with the new notification
+                const updatedUser = await userModel.findOneAndUpdate(
+                    { username: user }, // Match user by name
+                    { $push: { notifications: { message, date } } }, // Push the notification to the user's notifications array
+                    { new: true } // Return the updated document
+                );
+
+                if (!updatedUser) {
+                    console.error('User not found');
+                    return socket.emit('error', { message: 'User not found' });
+                }
+                console.log('Updated user:', updatedUser);
+
+                console.log('Notification added successfully to user:', updatedUser.notifications);
+            } catch (error) {
+                console.error('Error updating user notifications:', error);
+            }
+        });
+
         socket.on('disconnect', () => {
             console.log(`Client disconnected: ${socket.id}`);
         });
@@ -56,4 +114,4 @@ const sendMessageToSocketId = (socketId, messageObject) => {
     }
 };
 
-export { initializeSocket, sendMessageToSocketId };
+export { initializeSocket, io, sendMessageToSocketId };

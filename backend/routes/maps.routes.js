@@ -2,8 +2,9 @@ import {Router} from 'express';
 import { query} from 'express-validator';
 import * as authMiddleware from '../middleware/auth.middleware.js';
 import *as mapController from '../controllers/map.controller.js';
- 
-
+import { Socket } from 'socket.io';
+import { io } from '../socket.js'; // Import the io instance
+import dogwalkerModel from '../models/dogwalker.model.js';
 
 const router = Router();
 router.get('/get-coordinates',
@@ -38,6 +39,14 @@ router.get('/get-address',
   query('lng').isFloat().withMessage('Longitude must be a float'),
   authMiddleware.authUser,
   mapController.getAddressFromCoordinates
+);
+
+router.get('/send-request',
+  query('user').isString().withMessage('User must be a string'),
+  query('filters').isString().withMessage('Filters must be a string'),
+  query('dogwalkerId').isString().withMessage('Dogwalker ID must be a string'),
+  authMiddleware.authUser,
+  mapController.sendRequest // Call the controller function
 );
 
 export default router;

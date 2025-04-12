@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as userController from '../controllers/user.controller.js';
 import { body } from 'express-validator';
 import * as authMiddleware from '../middleware/auth.middleware.js';
+import userModel from '../models/user.model.js';
 
 const router = Router();
 
@@ -23,6 +24,32 @@ router.post('/login',
 router.get('/profile', authMiddleware.authUser, userController.profileController);
 
 router.get('/logout', authMiddleware.authUser, userController.logoutController);
+
+
+router.get('/notifications', async (req, res) => {
+    try {
+        const { userId } = req.query;
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
+        }
+       
+        const user= await userModel.findOne({ _id: userId });
+        if (!user) {
+            return res.status(404).json({ message: 'user not found' });
+        }
+        // console.log(user.notifications);
+
+        
+        
+
+
+        res.status(200).json(user.notifications);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
 
 
 

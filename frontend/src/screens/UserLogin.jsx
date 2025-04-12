@@ -6,6 +6,7 @@ import {faEnvelope, faPaw} from '@fortawesome/free-solid-svg-icons'
 import Box from '@mui/material/Box';
 import Badge from '@mui/material/Badge';
 import { UserDataContext } from '../context/User.Context';
+import { Link } from 'react-router-dom';
 
 const UserLogin = () => {
   const [email, setEmail] = useState('');
@@ -41,13 +42,15 @@ const UserLogin = () => {
              </div>
              <div className="flex items-center space-x-2">
               
-               <div><a href="#our-services">
-                 <Box sx={{ color: 'action.active' }}>
-                   <Badge color="primary" variant="dot">
-                     <i className=" text-black ri-chat-4-line"></i>
-                   </Badge>
-                 </Box>
-               </a></div>
+                 <div>
+                                   <Link to="/inbox">
+                                     <Box sx={{ color: 'action.active' }}>
+                                       <Badge color="primary" variant="dot">
+                                         <i className=" text-black ri-chat-4-line"></i>
+                                       </Badge>
+                                     </Box>
+                                   </Link>
+                                 </div>
                <div><a href="#our-services">
                  <Box sx={{ color: 'action.active' }}>
                    <Badge badgeContent={4} color="primary">

@@ -2,6 +2,7 @@ import *as dogwalkerController from '../controllers/dogwalker.controller.js';
 import { Router } from 'express';
 import { body} from 'express-validator';
 import * as authMiddleware from '../middleware/auth.middleware.js';
+import dogwalkerModel from '../models/dogwalker.model.js';
 
 const router = Router();
 router.post('/register', [
@@ -38,5 +39,72 @@ router.post('/availability', authMiddleware.authDogwalker, [
     body('dates').isArray().withMessage('Dates must be an array of strings'),
     body('dogwalkerId').isString().withMessage('Dogwalker ID must be a string'),
 ], dogwalkerController.setAvailability);
+
+router.get('/upcoming-bookings', authMiddleware.authDogwalker, async (req, res) => {
+    try {
+        const dogwalker = req.dogwalker; // Auth middleware attaches the dogwalker to the request
+        if (!dogwalker) {
+            return res.status(404).json({ message: 'Dogwalker not found' });
+        }
+        const walker = await dogwalkerModel.findOne({ email: dogwalker.email });
+        // console.log(walker)
+       
+
+        res.status(200).json(walker.upcomingBookings);
+    } catch (error) {
+        console.error('Error fetching upcoming bookings:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+router.post('/update-booking-status', authMiddleware.authDogwalker, async (req, res) => {
+    try {
+        const { bookingId, status } = req.body;
+
+        const dogwalker = req.dogwalker; // Auth middleware attaches the dogwalker to the request
+        if (!dogwalker) {
+            return res.status(404).json({ message: 'Dogwalker not found' });
+        }
+        const walker = await dogwalkerModel.findOneAndUpdate(
+            { email: dogwalker.email, "upcomingBookings._id": bookingId },
+            { $set: { "upcomingBookings.$.status": status } },
+            { new: true }
+        );
+
+        if (!walker) {
+            return res.status(404).json({ message: 'Booking or Dogwalker not found' });
+        }
+
+        const booking = walker.upcomingBookings.find((b) => b._id.toString() === bookingId);
+    
+
+        res.status(200).json({ message: 'Booking status updated successfully', booking });
+    } catch (error) {
+        console.error('Error updating booking status:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
+router.get('/notifications', async (req, res) => {
+    try {
+        const { dogwalkerId } = req.query;
+
+        if (!dogwalkerId) {
+            return res.status(400).json({ message: 'dogwalkerId ID is required' });
+        }
+       
+        const dogwalker= await dogwalkerModel.findOne({ _id: dogwalkerId });
+        if (!dogwalker) {
+            return res.status(404).json({ message: 'dogwalker not found' });
+        }
+        console.log(dogwalker.notifications);
+
+        res.status(200).json(dogwalker.notifications);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 
 export default router;

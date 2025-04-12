@@ -9,6 +9,10 @@ import axios from 'axios';
 import { UserDataContext } from '../context/User.Context';
 import Badge from '@mui/material/Badge';
 import { SocketContext } from '../context/SocketContext';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import { Link } from 'react-router-dom';
+
 
 const UserHome = () => {
   const [filters, setFilters] = useState({
@@ -20,30 +24,29 @@ const UserHome = () => {
     timeNeeded: '',
   });
   const { User } = useContext(UserDataContext);
-  // console.log(User);
   const { socket } = useContext(SocketContext);
-
   const [filterdogwalkers, setFilterDogWalkers] = useState([]);
   const [value, setValue] = useState([100, 1000]);
   const [locationSuggestions, setLocationSuggestions] = useState([]);
-
   const [addresses, setAddresses] = useState({});
-
- 
-
-useEffect(() => {
-  const fetchAddresses = async () => {
-    const newAddresses = {};
-    for (let walker of filterdogwalkers) {
-      const address = await getAddressFromCoordinates(walker.location.ltd, walker.location.lng);
-      newAddresses[walker._id] = address;
-    }
-    setAddresses(newAddresses);
-  };
-  fetchAddresses();
-}, [filterdogwalkers]);
+  const [requestingIds, setRequestingIds] = useState([]); // State to track requesting dogwalker IDs
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]); // Initialize with dummy data
 
   useEffect(() => {
+    const fetchAddresses = async () => {
+      const newAddresses = {};
+      for (let walker of filterdogwalkers) {
+        const address = await getAddressFromCoordinates(walker.location.ltd, walker.location.lng);
+        newAddresses[walker._id] = address;
+      }
+      setAddresses(newAddresses);
+    };
+    fetchAddresses();
+  }, [filterdogwalkers]);
+
+  useEffect(() => {
+    
     socket.emit('join', {
       userId: User._id,
       userType: 'user',
@@ -64,14 +67,36 @@ useEffect(() => {
 
     const locationInterval = setInterval(updateLocation, 10000);
     updateLocation();
+
+    const fetchNotifications = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/user/notifications`, {
+          params: { userId: User._id },
+        });
+        setNotifications(response.data);
+        console.log('Notifications fetched:', response.data);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    fetchNotifications();
   }, []);
 
+ 
   const handleChange2 = (event, newValue) => {
     setValue(newValue);
   };
   function valuetext(value) {
     return `₹${value}`; // for aria
   }
+  const handleDeleteNotification = (index) => {
+    setNotifications((prevNotifications) => {
+      const newNotifications = [...prevNotifications];
+      newNotifications.splice(index, 1);
+      return newNotifications;
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -84,13 +109,12 @@ useEffect(() => {
 
   const fetchSuggestions = async (input) => {
     try {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/map/get-suggestions`, {
-      params: { input },
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    // console.log("response.data.suggestions", response.data);
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/map/get-suggestions`, {
+        params: { input },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
       setLocationSuggestions(response.data || []);
     } catch (error) {
       console.error('Error fetching location suggestions:', error);
@@ -120,7 +144,6 @@ useEffect(() => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-       console.log('Address:', response.data.address);
       return response.data.address;
     } catch (error) {
       console.error('Error fetching address:', error);
@@ -134,15 +157,14 @@ useEffect(() => {
     const end = new Date(endDate);
 
     while (current <= end) {
-        const day = String(current.getDate()).padStart(2, '0');
-        const month = String(current.getMonth() + 1).padStart(2, '0');
-        dates.push(`${day}/${month}`);
-        current.setDate(current.getDate() + 1);
+      const day = String(current.getDate()).padStart(2, '0');
+      const month = String(current.getMonth() + 1).padStart(2, '0');
+      dates.push(`${day}/${month}`);
+      current.setDate(current.getDate() + 1);
     }
 
     return dates;
-}
-
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -154,7 +176,6 @@ useEffect(() => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      console.log('Coordinates:', response1.data);
 
       const response2 = await axios.get(`${import.meta.env.VITE_BASE_URL}/map/get-dogwalkers-in-radius`, {
         params: {
@@ -166,10 +187,8 @@ useEffect(() => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      console.log('Dog Walkers in Radius:', response2.data);
 
       const dateRange = getDateRangeStrings(filters.startDate, filters.endDate);
-      // console.log('Date Range:', dateRange);
 
       const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/dogwalker/filter`, {
         NearbyWalkers: response2.data,
@@ -177,7 +196,6 @@ useEffect(() => {
         hourlyRatelow: value[0],
         hourlyRatehigh: value[1],
       });
-      console.log('Filtered Dog Walkers:', response.data);
       setFilterDogWalkers(response.data);
     } catch (error) {
       console.error('Error fetching filtered dog walkers:', error);
@@ -187,135 +205,163 @@ useEffect(() => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       {/* Header */}
-      <header className="w-full bg-[white] border-b border-gray-300 text-black flex items-center justify-between px-6 py-4 shadow-md">
-        <div className="flex items-center">
-          <h1 className=" text-3xl font-[Open_Sans]">pawpals</h1>
-          &nbsp;&nbsp;&nbsp;&nbsp;
-        </div>
-        <div className="flex items-center space-x-2">
-          <div>
-            <a href="#our-services">
-              <Box sx={{ color: 'action.active' }}>
-                <Badge color="primary" variant="dot">
-                  <i className=" text-black ri-chat-4-line"></i>
-                </Badge>
-              </Box>
-            </a>
+        <header className="w-full bg-[white] border-b border-gray-300 text-black flex items-center justify-between px-6 py-4 shadow-md relative">
+          <div className="flex items-center">
+            <h1 className=" text-3xl font-[Open_Sans]">pawpals</h1>
+            &nbsp;&nbsp;&nbsp;&nbsp;
           </div>
-          <div>
-            <a href="#our-services">
-              <Box sx={{ color: 'action.active' }}>
-                <Badge badgeContent={4} color="primary">
-                  <i className="text-black ri-notification-2-line "></i>
-                </Badge>
-              </Box>
-            </a>
-          </div>
-        </div>
-      </header>
+          <div className="flex items-center space-x-2">
+            <div>
+          <Link to="/inbox">
+            <Box sx={{ color: 'action.active' }}>
+              <Badge color="primary" variant="dot">
+            <i className=" text-black ri-chat-4-line"></i>
+              </Badge>
+            </Box>
+          </Link>
+            </div>
+            <div className="relative">
+          <button onClick={() => setShowNotifications(!showNotifications)}>
+            <Box sx={{ color: 'action.active' }}>
+              <Badge badgeContent={notifications.length} color="primary">
+            <i className="text-black ri-notification-2-line "></i>
+              </Badge>
+            </Box>
+          </button>
+          {showNotifications && (
+            <div className="absolute right-0 mt-2 w-100 h-100 p-4 bg-white border border-gray-300 rounded-lg shadow-lg z-10 overflow-auto">
+              <h3 className="text-lg font-semibold mb-2">Notifications</h3>
+              {notifications.length > 0 ? (
+                notifications.map((notification, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center p-2 border-b border-gray-200"
+                  >
+                    <div>
+                      <p className="text-sm">{notification.message}</p>
+                      <p className="text-xs text-gray-500">{notification.date}</p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteNotification(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <i className="ri-delete-bin-line"></i>
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className=" text-sm text-gray-500 text-center mt-4">
+                  No Notifications<br />You're all caught up!
+                </p>
+              )}
+            </div>
+          )}   </div>
+            </div>
+        
+        </header>
 
-      {/* Main Content */}
+        {/* Main Content */}
       <div className="flex flex-grow mt-4  px-6 space-x-4">
         {/* Left Section */}
         <div className="w-1/4 flex flex-col space-y-4 mx-4">
           {/* Section: Filter Form */}
-                <div className="max-w-md bg-white p-4 rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold mb-4 text-center">Choose your pet walker</h2>
-                <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1">Location:</label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={filters.location}
-                    onChange={handleLocationChange}
-                    placeholder="e.g., New York"
-                    className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
-                  />
-                  {locationSuggestions.length > 0 && (
-                    <ul className="border border-gray-300 rounded-md mt-2 bg-white max-h-40 overflow-hidden">
+          <div className="max-w-md bg-white p-4 rounded-lg shadow-md">
+            <h2 className="text-2xl font-bold mb-4 text-center">Choose your pet walker</h2>
+            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="block text-sm font-medium mb-1">Location:</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={filters.location}
+                  onChange={handleLocationChange}
+                  placeholder="e.g., New York"
+                  className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
+                />
+                {locationSuggestions.length > 0 && (
+                  <ul className="border border-gray-300 rounded-md mt-2 bg-white max-h-40 overflow-hidden">
                     {locationSuggestions.map((suggestion, index) => (
                       <li
-                      key={index}
-                      onClick={() => handleSuggestionSelect(suggestion)}
-                      className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                        key={index}
+                        onClick={() => handleSuggestionSelect(suggestion)}
+                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                       >
-                      {suggestion}
+                        {suggestion}
                       </li>
                     ))}
-                    </ul>
-                  )}
-                  </div>
-                  <div>
-                  <label className="block text-sm font-medium mb-1">Service:</label>
-                  <select
-                    name="service"
-                    value={filters.service || ''}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
-                  >
-                    <option value="Dog walking">Dog walking</option>
-                    <option value="Doggy day care">Doggy day care</option>
-                    <option value="Home visits">Home visits</option>
-                    <option value="Dog boarding">Dog boarding</option>
-                  </select>
-                  </div>
-                  <div>
-                  <label className="block text-sm font-medium mb-1">Walkers per day:</label>
-                  <select
-                    name="walkersPerDay"
-                    value={filters.walkersPerDay || ''}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
-                  >
-                    <option value="" disabled>
+                  </ul>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Service:</label>
+                <select
+                  name="service"
+                  value={filters.service || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
+                >
+                  <option value="Dog walking">Dog walking</option>
+                  <option value="Doggy day care">Doggy day care</option>
+                  <option value="Home visits">Home visits</option>
+                  <option value="Dog boarding">Dog boarding</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Walkers per day:</label>
+                <select
+                  name="walkersPerDay"
+                  value={filters.walkersPerDay || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
+                >
+                  <option value="" disabled>
                     Select an option
-                    </option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3+">3+</option>
-                  </select>
-                  </div>
-                  <div>
-                  <label className="block text-sm font-medium mb-1">Start Date:</label>
-                  <input
-                    type="date"
-                    name="startDate"
-                    value={filters.startDate || ''}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
-                  />
-                  </div>
-                  <div>
-                  <label className="block text-sm font-medium mb-1">End Date:</label>
-                  <input
-                    type="date"
-                    name="endDate"
-                    value={filters.endDate || ''}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
-                  />
-                  </div>
-                  <div>
-                  <label className="block text-sm font-medium mb-1">Time needed:</label>
-                  <select
-                    name="timeNeeded"
-                    value={filters.timeNeeded || ''}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
-                  >
-                    <option value="" disabled>
+                  </option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3+">3+</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Start Date:</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={filters.startDate || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">End Date:</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={filters.endDate || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Time needed:</label>
+                <select
+                  name="timeNeeded"
+                  value={filters.timeNeeded || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-grey rounded-md hover:border-black"
+                >
+                  <option value="" disabled>
                     Select a time
-                    </option>
-                    <option value="6am to 11am">6am to 11am</option>
-                    <option value="11am to 3pm">11am to 3pm</option>
-                    <option value="3pm to 10pm">3pm to 10pm</option>
-                  </select>
-                  </div>
-                  <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1">Rate per walk</label>
-                  <Box sx={{ width: 300 }}>
-                    {/* Dynamic min/max display */}
+                  </option>
+                  <option value="6am to 11am">6am to 11am</option>
+                  <option value="11am to 3pm">11am to 3pm</option>
+                  <option value="3pm to 10pm">3pm to 10pm</option>
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium mb-1">Rate per walk</label>
+                <Box sx={{ width: 300 }}>
+                  {/* Dynamic min/max display */}
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Typography sx={{ minWidth: 50 }}>₹{value[0]}</Typography>
 
@@ -374,12 +420,12 @@ useEffect(() => {
               />
               <div className="flex flex-col ml-2">
                 <p className="text-base font-semibold">{User.username}</p>
-                <a href="#edit profile" className="text-sm mt-1 opacity-50 hover:underline">
+                <Link to="/inbox" className="text-sm mt-1 opacity-50 hover:underline">
                   Edit Profile
-                </a>
-                <a href="#edit profile" className="text-sm opacity-50 hover:underline">
+                </Link>
+                <Link to="/inbox" className="text-sm opacity-50 hover:underline">
                   View Profile
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -449,26 +495,43 @@ useEffect(() => {
                 {/* Send Request Button */}
                 <div className="mt-4">
                   <button
-                    className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                    onClick={() => {
-                      socket.emit('new-request', {
-                        user: {
-                          id: User._id,
-                          name: User.username,
-                          profileImage: User.profileImage,
-                        },
-                        filters: {
-                          location: filters.location,
-                          service: filters.service,
-                          startDate: filters.startDate,
-                          endDate: filters.endDate,
-                          timeNeeded: filters.timeNeeded,
-                          rateRange: value,
-                        },
-                        dogwalkerId: walker._id,
-                      
-                      });
-                      console.log(`Request sent to ${walker.name}`);
+                    className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:bg-gray-400"
+                    disabled={requestingIds.includes(walker._id)} // Disable button for specific walker
+                    onClick={async () => {
+                      setRequestingIds((prev) => [...prev, walker._id]); // Add walker ID to requesting list
+                      socket.emit('new-notification-user', {
+                        user: walker.name,
+                        message: `${User.username} has sent you a service request`,
+                        date: new Date().toLocaleString(),
+                      })
+                      try {
+                        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/map/send-request`, {
+                          params: {
+                            user: JSON.stringify({
+                              id: User._id,
+                              name: User.username,
+                              profileImage: User.profileImage,
+                            }),
+                            filters: JSON.stringify({
+                              location: filters.location,
+                              service: filters.service,
+                              startDate: filters.startDate,
+                              endDate: filters.endDate,
+                              timeNeeded: filters.timeNeeded,
+                              rateRange: value,
+                            }),
+                            dogwalkerId: walker._id,
+                          },
+                          headers: {
+                            Authorization: `Bearer ${localStorage.getItem('token')}`,
+                          },
+                        });
+                        console.log('Request sent successfully:', response.data);
+                      } catch (error) {
+                        console.error('Error sending request:', error);
+                      } finally {
+                        // Keep the button disabled for this walker
+                      }
                     }}
                   >
                     Send Request
@@ -479,9 +542,11 @@ useEffect(() => {
           </div>
         </div>
 
+     
+
         {/* Right Section: LiveTracking */}
         <div className="w-1/4 flex items-center justify-center bg-white h-screen sticky top-0 rounded-lg shadow-md  space-y-4 ">
-          <LiveTracking filterdogwalkers={filterdogwalkers} /> 
+          <LiveTracking filterdogwalkers={filterdogwalkers} />
         </div>
       </div>
     </div>

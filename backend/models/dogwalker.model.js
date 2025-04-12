@@ -53,6 +53,14 @@ const DogWalkerSchema = new mongoose.Schema({
         type: Number, // rate in currency per hour
         required: true,
     },
+    upcomingBookings:{
+        type:[Object],
+        default: [],
+    },
+    notifications: {
+        type: [Object],
+        default: [],
+    },
 });
 
 DogWalkerSchema.statics.hashPassword = async function (password) {
