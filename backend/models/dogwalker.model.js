@@ -53,15 +53,31 @@ const DogWalkerSchema = new mongoose.Schema({
         type: Number, // rate in currency per hour
         required: true,
     },
-    upcomingBookings:{
-        type:[Object],
-        default: [],
-    },
-    notifications: {
-        type: [Object],
-        default: [],
-    },
+    upcomingBookings: [
+        {
+            _id: String,
+            date: String,
+            time: String,
+            service: String,
+            client: String,
+            status: String,
+            expireAt: { type: Date, default: () => Date.now() + 3 * 24 * 60 * 60 * 1000 }, // 3 days from creation
+        }
+    ],
+    notifications: [
+        {
+            message: String,
+            date: { type: Date, default: Date.now },
+            expireAt: { type: Date, default: () => Date.now() + 3 * 24 * 60 * 60 * 1000 }, // 3 days from creation
+        }
+    ],
 });
+
+// Ensure TTL index is created for notifications
+DogWalkerSchema.index({ "notifications.expireAt": 1 }, { expireAfterSeconds: 0 });
+
+// Ensure TTL index is created for upcomingBookings
+DogWalkerSchema.index({ "upcomingBookings.expireAt": 1 }, { expireAfterSeconds: 0 });
 
 DogWalkerSchema.statics.hashPassword = async function (password) {
     return await bcrypt.hash(password, 10);

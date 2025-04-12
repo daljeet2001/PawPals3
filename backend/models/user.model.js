@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -44,10 +43,25 @@ const userSchema = new mongoose.Schema({
         }
       
     },
-    notifications: {
-        type: [Object],
-        default: [],
-    },
+    notifications: [
+        {
+            message: String,
+            date: { type: Date, default: Date.now },
+            expireAt: { type: Date, default: () => Date.now() + 3 * 24 * 60 * 60 * 1000 }, // 3 days from creation
+        }
+    ],
+
+    upcomingBookings: [
+        {
+            _id: String,
+            date: String,
+            time: String,
+            service: String,
+            walker: String,
+            status: String,
+            expireAt: { type: Date, default: () => Date.now() + 3 * 24 * 60 * 60 * 1000 }, // 3 days from creation
+        }
+    ],
 
     dog: {
         dogname: {
@@ -80,6 +94,11 @@ const userSchema = new mongoose.Schema({
     },
 })
 
+// Ensure TTL index is created for notifications
+userSchema.index({ "notifications.expireAt": 1 }, { expireAfterSeconds: 0 });
+
+// Ensure TTL index is created for upcomingBookings
+userSchema.index({ "upcomingBookings.expireAt": 1 }, { expireAfterSeconds: 0 });
 
 userSchema.statics.hashPassword = async function (password) {
     return await bcrypt.hash(password, 10);

@@ -60,7 +60,7 @@ const DogwalkerRegister = () => {
                                    <h1 className=" text-3xl font-[Open_Sans]">pawpals</h1>
                                    &nbsp;&nbsp;&nbsp;&nbsp;
                                  </div>
-                                 <div className="flex items-center space-x-2">
+                                 {/* <div className="flex items-center space-x-2">
                                   
                                       <div>
                                                         <Link to="/inbox">
@@ -79,7 +79,7 @@ const DogwalkerRegister = () => {
                                      </Box>
                                    </a></div>
                                   
-                                 </div>
+                                 </div> */}
                                </header>
     <div className="flex min-h-screen">
       {/* Left Side: Registration Form */}
