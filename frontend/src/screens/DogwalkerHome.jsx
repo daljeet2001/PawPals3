@@ -22,6 +22,7 @@ const DogwalkerHome = () => {
       // { message: 'A new dog walker is available in your area.', date: '2023-09-02' },
      
     ]);
+  const [buttonClicked, setButtonClicked] = useState(false);
 
   useEffect(() => {
     const fetchUpcomingBookings = async () => {
@@ -365,29 +366,37 @@ const DogwalkerHome = () => {
 
                 return (
                   <div
-                    key={i}
-                    onClick={() => toggleDateSelection(dateNum)}
-                    className={`flex flex-col items-center justify-center w-18 h-18 border rounded-md cursor-pointer ${
-                      isSelected ? 'bg-gray-200 border-gray-100' : 'border-gray-300 hover:bg-gray-200'
-                    }`}
+                  key={i}
+                  onClick={() => toggleDateSelection(dateNum)}
+                  className={`flex flex-col items-center justify-center w-18 h-18 border rounded-md cursor-pointer ${
+                  isSelected ? 'bg-gray-200 border-gray-100' : 'border-gray-300 hover:bg-gray-200'
+                  }`}
                   >
-                    <span className="text-sm font-medium">{day}</span>
-                    <span className="text-lg font-bold">{dateNum}</span>
+                  <span className="text-sm font-medium">{day}</span>
+                  <span className="text-lg font-bold">{dateNum}</span>
                   </div>
                 );
-              })}
-            </div>
-            <div className="flex flex-row-reverse">
-              <button
-                onClick={confirmAvailability}
-                className="mt-2 px-4 py-2 font-medium text-black rounded-md bg-[#F3F4F6] hover:bg-white ml-1"
-              >
-                <FontAwesomeIcon icon={faCheck} /> Confirm Availability
-              </button>
-            </div>
-          </div>
+                })}
+                </div>
+                <div className="flex flex-row-reverse">
+                <button
+                onClick={() => {
+                  confirmAvailability();
+                  setButtonClicked(true);
+                }}
+                disabled={buttonClicked}
+                className={`mt-2 px-4 py-2 font-medium text-black rounded-md ml-1 ${
+                buttonClicked
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : 'bg-[#F3F4F6] hover:bg-white'
+                }`}
+                >
+                <FontAwesomeIcon icon={faCheck} /> {buttonClicked ? 'Confirmed' : 'Confirm Availability'}
+                </button>
+                </div>
+                </div>
 
-          {/* Upcoming Bookings Section */}
+                {/* Upcoming Bookings Section */}
           <div className="bg-white p-4 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold mb-2">Upcoming Bookings</h2>
             <p className="font-normal opacity-50 mb-4">Here are your upcoming bookings for the next week:</p>

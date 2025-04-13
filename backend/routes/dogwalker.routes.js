@@ -106,5 +106,14 @@ router.get('/notifications', async (req, res) => {
     }
 });
 
+router.get('/all', async (req, res) => {
+    try {
+        const dogwalkers = await dogwalkerModel.find({});
+        res.status(200).json(dogwalkers);
+    } catch (error) {
+        console.error('Error fetching all dogwalkers:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
 
 export default router;

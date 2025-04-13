@@ -46,22 +46,22 @@ const userSchema = new mongoose.Schema({
     notifications: [
         {
             message: String,
-            date: { type: Date, default: Date.now },
+            date: { type:String},
             expireAt: { type: Date, default: () => Date.now() + 3 * 24 * 60 * 60 * 1000 }, // 3 days from creation
         }
     ],
 
-    upcomingBookings: [
-        {
-            _id: String,
-            date: String,
-            time: String,
-            service: String,
-            walker: String,
-            status: String,
-            expireAt: { type: Date, default: () => Date.now() + 3 * 24 * 60 * 60 * 1000 }, // 3 days from creation
-        }
-    ],
+    // upcomingBookings: [
+    //     {
+    //         _id: String,
+    //         date: String,
+    //         time: String,
+    //         service: String,
+    //         walker: String,
+    //         status: String,
+    //         expireAt: { type: Date, default: () => Date.now() + 3 * 24 * 60 * 60 * 1000 }, // 3 days from creation
+    //     }
+    // ],
 
     dog: {
         dogname: {

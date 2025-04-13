@@ -33,6 +33,8 @@ const UserHome = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]); // Initialize with dummy data
 
+
+
   useEffect(() => {
     const fetchAddresses = async () => {
       const newAddresses = {};
@@ -81,6 +83,28 @@ const UserHome = () => {
     };
 
     fetchNotifications();
+
+    
+
+
+
+  }, []);
+
+  useEffect(() => {
+    const fetchAllDogwalkers = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/dogwalker/all`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        setFilterDogWalkers(response.data); // Set the fetched dogwalkers
+      } catch (error) {
+        console.error('Error fetching all dogwalkers:', error);
+      }
+    };
+
+    fetchAllDogwalkers();
   }, []);
 
  
@@ -501,7 +525,7 @@ const UserHome = () => {
                       setRequestingIds((prev) => [...prev, walker._id]); // Add walker ID to requesting list
                       socket.emit('new-notification-user', {
                         user: walker.name,
-                        message: `${User.username} has sent you a service request`,
+                        message: `${User.username} has sent you a ${filters.service} request`,
                         date: new Date().toLocaleString(),
                       })
                       try {

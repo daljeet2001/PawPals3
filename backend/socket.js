@@ -72,7 +72,7 @@ function initializeSocket(server) {
 
         socket.on('new-notification-dogwalker', async (data) => {
             const { user, message, date } = data;
-            // console.log('Notification data:', data);
+            console.log('Notification data:', data);
 
             if (!message || !user) {
                 return socket.emit('error', { message: 'Invalid notification data' });
