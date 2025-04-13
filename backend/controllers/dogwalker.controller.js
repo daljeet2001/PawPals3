@@ -9,7 +9,12 @@ export const registerDogwalker = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, phone, description, hourlyRate,image } = req.body;
+    const { name, email, password, phone, description, hourlyRate } = req.body;
+    const image = req.file?.path; // Get the uploaded image URL from Cloudinary
+
+    if (!image) {
+        return res.status(400).json({ message: 'Image upload failed. Please try again.' });
+    }
 
     const isDogwalkerAlreadyExist = await dogwalkerModel.findOne({ email });
 
@@ -19,20 +24,25 @@ export const registerDogwalker = async (req, res, next) => {
 
     const hashedPassword = await dogwalkerModel.hashPassword(password);
 
-    const dogwalker = await dogwalkerService.createDogwalker({
-        name,
-        email,
-        password: hashedPassword,
-        phone,
-        description,
-        hourlyRate,
-        image
-    });
-    req.dogwalker = dogwalker;
+    try {
+        const dogwalker = await dogwalkerService.createDogwalker({
+            name,
+            email,
+            password: hashedPassword,
+            phone,
+            description,
+            hourlyRate,
+            image,
+        });
+        req.dogwalker = dogwalker;
 
-    const token = dogwalker.generateJWT();
+        const token = dogwalker.generateJWT();
 
-    res.status(201).json({ token, dogwalker });
+        res.status(201).json({ token, dogwalker });
+    } catch (error) {
+        console.error('Error creating dogwalker:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
 };
 
 export const loginDogwalker = async (req, res, next) => {

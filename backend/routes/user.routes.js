@@ -3,18 +3,29 @@ import * as userController from '../controllers/user.controller.js';
 import { body } from 'express-validator';
 import * as authMiddleware from '../middleware/auth.middleware.js';
 import userModel from '../models/user.model.js';
+import upload from '../utils/cloudinaryStorage.js'; // Import the upload middleware
 
 const router = Router();
 
-
-
-router.post('/register',
+router.post(
+    '/register',
+    upload.single('profileImage'), // Handle image upload
+    (req, res, next) => {
+        if (req.body.dog) {
+            try {
+                req.body.dog = JSON.parse(req.body.dog); // Parse the dog field
+            } catch (error) {
+                return res.status(400).json({ errors: [{ msg: 'Invalid dog object format' }] });
+            }
+        }
+        next();
+    },
     body('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
     body('email').isEmail().withMessage('Email must be a valid email address'),
     body('password').isLength({ min: 3 }).withMessage('Password must be at least 3 characters long'),
-    body('profileImage').isString().withMessage('Profile image must be a string'),
     body('dog').isObject().withMessage('Dog must be an object'),
-    userController.createUserController);
+    userController.createUserController
+);
 
 router.post('/login',
     body('email').isEmail().withMessage('Email must be a valid email address'),
@@ -57,4 +68,3 @@ router.get('/notifications', async (req, res) => {
 
 export default router;
 
- 

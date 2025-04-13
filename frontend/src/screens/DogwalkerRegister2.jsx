@@ -10,8 +10,19 @@ const DogwalkerRegister2 = () => {
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach((key) => {
+      if (key === 'image') {
+        formData.append(key, data[key][0]); // Append the file object for the image
+      } else {
+        formData.append(key, data[key]);
+      }
+    });
+
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/dogwalker/register`, data);
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/dogwalker/register`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       if (response.status === 201) {
         const responseData = response.data;
         console.log(responseData);
@@ -88,13 +99,12 @@ const DogwalkerRegister2 = () => {
               </div>
 
               <div>
-                <label htmlFor="image" className="block text-sm font-medium">Profile Image URL</label>
+                <label htmlFor="image" className="block text-sm font-medium">Profile Image</label>
                 <input
-                  type="text"
+                  type="file"
                   id="image"
-                  {...register('image', { required: 'Profile image URL is required' })}
+                  {...register('image', { required: 'Profile image is required' })}
                   className={`w-full px-4 py-2 mt-1 border rounded-md hover:border-black ${errors.image ? 'border-red-500' : 'border-gray-300'}`}
-                  placeholder="Enter image URL"
                 />
                 {errors.image && <span className="text-red-500 text-sm">{errors.image.message}</span>}
               </div>

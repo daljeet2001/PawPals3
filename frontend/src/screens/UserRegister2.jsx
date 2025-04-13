@@ -17,20 +17,26 @@ const UserRegsiter = () => {
 
   const onSubmit = async (data) => {
     try {
-      const userData = {
-        ...data,
-        dog: {
-          dogname: data.dogname,
-          gender: data.gender,
-          breed: data.breed,
-          dogSize: data.dogSize,
-          description: data.description,
-        }, // Combine dog-related fields into a single object
+      const formData = new FormData();
+      const dogData = {
+        dogname: data.dogname,
+        gender: data.gender,
+        breed: data.breed,
+        dogSize: data.dogSize,
+        description: data.description,
       };
+      formData.append('dog', JSON.stringify(dogData));
+      Object.keys(data).forEach((key) => {
+        formData.append(key, data[key]);
+      });
+      formData.append('profileImage', data.profileImage[0]); // Append the file
 
-      console.log('Registering with:', userData);
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/register`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/register`, userData);
       if (response.status === 201) {
         const responseData = response.data;
         console.log(responseData);
@@ -149,16 +155,15 @@ const UserRegsiter = () => {
               </div>
               <div>
                 <label htmlFor="profileImage" className="block text-sm font-medium">
-                  Profile Image URL
+                  Profile Image
                 </label>
                 <input
-                  type="text"
+                  type="file"
                   id="profileImage"
-                  {...register('profileImage', { required: 'Profile image URL is required' })}
+                  {...register('profileImage', { required: 'Profile image is required' })}
                   className={`w-full px-4 py-2 mt-1 border rounded-md hover:border-black ${
                     errors.profileImage ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="Enter your profile image URL"
                 />
                 {errors.profileImage && <span className="text-red-500 text-sm">{errors.profileImage.message}</span>}
               </div>
